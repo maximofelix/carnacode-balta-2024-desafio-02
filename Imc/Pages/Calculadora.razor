@@ -1,0 +1,84 @@
+﻿@using System
+@page "/calculadora"
+@inject NavigationManager NavigationManager;
+ 
+    <div class="app-container">
+            <div class="title-logo">
+                <img src="../assets/icon.png" class="logo" alt="">
+            </div>
+        @if (ModalVisible)
+        {
+            <Result IsVisible="@ModalVisible" onclickCloseModal="@Close" TitleText="@ResultadoTitulo" DescriptionText="@ResultadoDescricao" />
+        }
+        else
+        {
+            <div class="title-container">
+                <h1 class="title">Cálculo de IMC</h1>
+            </div>
+            <div class="imc-data-container">
+                <input class="inputHeight" @bind="@Altura" type="number" placeholder="Altura"/>
+                <input class="inputWeight" @bind="@Peso" type="number" placeholder="Peso"/>
+                <input class="inputSex" @bind="@Sexo" type="text" placeholder="Sexo"/>
+            </div>
+            <div class="ageCaptcha-container">
+                <input class="ageCaptcha" id="ageCaptcha" type="checkbox">
+                <label for="ageCaptcha">Eu tenho 65 anos ou mais</label>
+            </div>
+            <div class="button-request-container">
+            <button class="btnCalculate" onclick="@CalculaImcOnValidSubmit">Calcular meu IMC</button>
+                    <a href="https://vidasaudavel.einstein.br/calcular-o-seu-imc/" class="btnUnderstand" target="_blank">
+                        Entenda o cálculo
+                    </a>
+            </div>
+        }
+    </div> 
+@code
+{
+    public bool ModalVisible { get; set; } = false;
+    private string Altura = "";
+    private string Peso = "";
+    private double AlturaDec => string.IsNullOrEmpty(Altura) ? 0.0 : double.Parse(Altura);
+    private double PesoDec => string.IsNullOrEmpty(Peso) ? 0.0 : double.Parse(Peso);
+    public string Sexo { get; set; } = "";
+    public double Resultado { get; set; }
+    public string? ResultadoTitulo { get; set; }
+    public string? ResultadoDescricao { get; set; }
+    
+    private void Close()
+    {
+        ModalVisible = false;
+    }
+
+    private void EmptyField()
+    {
+        Altura = string.Empty;
+        Peso = string.Empty;
+    }
+
+    public void CalculaImcOnValidSubmit()
+    {
+        Resultado = Math.Round(PesoDec / (AlturaDec * AlturaDec), 2);
+        if (Resultado < 18.5)
+        {
+            ResultadoTitulo = "Peso baixo!";
+            ResultadoDescricao = "Peso baixo!";
+        }
+        if (Resultado >= 18.5 && Resultado < 25)
+        {
+            ResultadoTitulo = "Peso Ideal!";
+            ResultadoDescricao = "Peso Ideal!";
+        }
+        if (Resultado >= 25 && Resultado < 30)
+        {
+            ResultadoTitulo = "Sobrepeso";
+            ResultadoDescricao = "Sobrepeso";
+        }
+        if (Resultado > 30)
+        {
+            ResultadoTitulo = "Obesidade";
+            ResultadoDescricao = "Obesidade";
+        }
+        ModalVisible = true;
+        EmptyField();
+    }
+}
